@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  background: #F8F9FA;
+  color: #1F2937;
+}
+
+body {
+  font-feature-settings: "kern";
+}
+
+/* Hide scrollbar but keep functionality (for horizontal news scroller) */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #EEF0F4 0%, #F8F9FA 50%, #EEF0F4 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
