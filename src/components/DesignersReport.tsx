@@ -29,7 +29,7 @@ export function DesignersReport() {
   )[0];
 
   return (
-    <SectionCard title="تقرير المصممين">
+    <SectionCard title="تقرير المصممين — القسم الفني">
       {q.isLoading ? (
         <SkeletonList count={6} />
       ) : q.error ? (

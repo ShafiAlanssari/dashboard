@@ -52,7 +52,7 @@ export function TasksSection() {
 
   return (
     <SectionCard
-      title="مهامي المعلقة في Asana"
+      title="طلبات جديدة في Traffic — تحتاج توزيع"
       action={
         <div className="flex gap-1">
           {filters.map((f) => (

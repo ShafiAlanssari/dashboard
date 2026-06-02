@@ -17,6 +17,11 @@ export type AsanaUser = {
   email?: string;
 };
 
+export type AsanaProject = {
+  gid: string;
+  name: string;
+};
+
 async function asanaFetch<T>(path: string): Promise<T> {
   const token = process.env.ASANA_ACCESS_TOKEN;
   if (!token) throw new Error("ASANA_ACCESS_TOKEN غير معرف في .env.local");
@@ -38,40 +43,43 @@ export async function getMe(): Promise<AsanaUser & { workspaces: { gid: string; 
   return asanaFetch("/users/me?opt_fields=name,email,workspaces.name");
 }
 
-export async function getMyTasks(): Promise<AsanaTask[]> {
-  const me = await getMe();
-  const workspaceGid = me.workspaces[0]?.gid;
-  if (!workspaceGid) return [];
+/** Cache projects list per workspace for the lifetime of the server process */
+const projectsCache = new Map<string, AsanaProject[]>();
 
-  const fields = "name,completed,due_on,permalink_url,assignee.name,projects.name,modified_at";
-  const path = `/tasks?assignee=me&workspace=${workspaceGid}&completed_since=now&opt_fields=${fields}&limit=100`;
-  return asanaFetch<AsanaTask[]>(path);
+async function listProjects(workspaceGid: string): Promise<AsanaProject[]> {
+  if (projectsCache.has(workspaceGid)) return projectsCache.get(workspaceGid)!;
+  const projects = await asanaFetch<AsanaProject[]>(
+    `/projects?workspace=${workspaceGid}&archived=false&opt_fields=name&limit=100`
+  );
+  projectsCache.set(workspaceGid, projects);
+  return projects;
 }
 
-export async function getWorkspaceTasksForUsers(userNames: string[]): Promise<AsanaTask[]> {
+/** Find a project by partial name match (case-insensitive). */
+export async function findProject(
+  workspaceGid: string,
+  needle: string
+): Promise<AsanaProject | null> {
+  const projects = await listProjects(workspaceGid);
+  const lc = needle.toLowerCase();
+  return (
+    projects.find((p) => p.name.toLowerCase() === lc) ??
+    projects.find((p) => p.name.toLowerCase().includes(lc) || lc.includes(p.name.toLowerCase())) ??
+    null
+  );
+}
+
+const TASK_FIELDS =
+  "name,completed,due_on,permalink_url,assignee.name,projects.name,modified_at";
+
+export async function getTasksInProject(projectGid: string): Promise<AsanaTask[]> {
+  return asanaFetch<AsanaTask[]>(
+    `/projects/${projectGid}/tasks?opt_fields=${TASK_FIELDS}&limit=100`
+  );
+}
+
+/** Get the workspace gid of the currently authenticated token. */
+export async function getDefaultWorkspaceGid(): Promise<string | null> {
   const me = await getMe();
-  const workspaceGid = me.workspaces[0]?.gid;
-  if (!workspaceGid) return [];
-
-  const users = await asanaFetch<AsanaUser[]>(
-    `/workspaces/${workspaceGid}/users?opt_fields=name,email&limit=100`
-  );
-
-  const matches = users.filter((u) =>
-    userNames.some((name) => u.name.includes(name) || name.includes(u.name))
-  );
-
-  const fields = "name,completed,due_on,permalink_url,assignee.name,projects.name,modified_at";
-  const results: AsanaTask[] = [];
-  for (const u of matches) {
-    try {
-      const tasks = await asanaFetch<AsanaTask[]>(
-        `/tasks?assignee=${u.gid}&workspace=${workspaceGid}&opt_fields=${fields}&limit=100`
-      );
-      results.push(...tasks);
-    } catch {
-      // skip user on error
-    }
-  }
-  return results;
+  return me.workspaces[0]?.gid ?? null;
 }

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة تحكم — مدير إدارة التصميم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --brand:        #1B1464;
+  --brand-light:  #7B5CE5;
+  --brand-glow:   #7B5CE520;
+  --bg:           #F2F3F8;
+  --white:        #FFFFFF;
+  --urgent:       #DC2626;
+  --urgent-bg:    #FEF2F2;
+  --urgent-border:#FECACA;
+  --amber:        #D97706;
+  --amber-bg:     #FFFBEB;
+  --success:      #059669;
+  --success-bg:   #ECFDF5;
+  --gray-50:      #F9FAFB;
+  --gray-100:     #F3F4F6;
+  --gray-200:     #E5E7EB;
+  --gray-400:     #9CA3AF;
+  --gray-500:     #6B7280;
+  --gray-700:     #374151;
+  --gray-900:     #111827;
+  --shadow:       0 1px 4px rgba(27,20,100,.07), 0 2px 8px rgba(27,20,100,.04);
+  --shadow-hover: 0 6px 20px rgba(27,20,100,.12);
+  --radius:       14px;
+  --radius-sm:    8px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg); color: var(--gray-900); font-family: 'Cairo', sans-serif; min-height: 100vh; }
+
+/* ─── HEADER ─── */
+header {
+  background: linear-gradient(135deg, var(--brand) 0%, #2D1B8E 50%, #3B2AA0 100%);
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 20px rgba(27,20,100,.35);
+}
+.header-inner {
+  max-width: 1400px; margin: 0 auto; padding: 12px 24px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.avatar {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: rgba(255,255,255,.18); backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.25);
+  display: grid; place-items: center;
+  font-size: 18px; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+}
+.header-name { font-weight: 700; color: #fff; font-size: 15px; line-height: 1.2; }
+.header-sub  { font-size: 11px; color: rgba(255,255,255,.55); }
+.header-counters { display: flex; gap: 8px; flex-wrap: wrap; margin-right: auto; }
+.counter {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 14px; border-radius: 30px;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(8px);
+}
+.counter-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink:0; }
+.counter-dot.red    { background: #F87171; box-shadow: 0 0 6px #F87171; }
+.counter-dot.yellow { background: #FBBF24; box-shadow: 0 0 6px #FBBF24; }
+.counter-label { font-size: 12px; color: rgba(255,255,255,.75); }
+.counter-value { font-size: 13px; font-weight: 700; color: #fff; min-width: 18px; text-align: center; }
+.btn-refresh {
+  padding: 7px 18px; border-radius: 30px; border: none; cursor: pointer;
+  background: rgba(255,255,255,.18); color: #fff; font-family: 'Cairo', sans-serif;
+  font-size: 13px; font-weight: 600; transition: background .2s;
+  border: 1px solid rgba(255,255,255,.25);
+}
+.btn-refresh:hover { background: rgba(255,255,255,.28); }
+.btn-gmail {
+  padding: 7px 16px; border-radius: 30px; border: 1px solid rgba(255,255,255,.3);
+  background: transparent; color: rgba(255,255,255,.85); font-family: 'Cairo',sans-serif;
+  font-size: 12px; cursor: pointer; transition: all .2s;
+}
+.btn-gmail:hover { background: rgba(255,255,255,.12); }
+
+/* ─── MAIN GRID ─── */
+main { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
+.grid-main {
+  display: grid;
+  grid-template-columns: 5fr 5fr 2fr;
+  gap: 18px; margin-bottom: 18px;
+}
+@media (max-width: 1100px) {
+  .grid-main { grid-template-columns: 1fr 1fr; }
+  .col-notes { grid-column: 1 / -1; }
+}
+@media (max-width: 700px) {
+  .grid-main { grid-template-columns: 1fr; }
+  .col-notes { grid-column: 1; }
+}
+.col-left { display: flex; flex-direction: column; gap: 18px; }
+
+/* ─── CARD ─── */
+.card {
+  background: var(--white); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 20px;
+  transition: box-shadow .25s;
+}
+.card:hover { box-shadow: var(--shadow-hover); }
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.card-title { font-size: 14px; font-weight: 700; color: var(--brand); }
+.card-title span { font-weight: 500; color: var(--gray-500); font-size: 12px; margin-right: 6px; }
+
+/* ─── FILTER TABS ─── */
+.filter-tabs { display: flex; gap: 4px; }
+.filter-btn {
+  padding: 4px 10px; border-radius: 20px; border: none; cursor: pointer;
+  font-family: 'Cairo',sans-serif; font-size: 11px; font-weight: 600;
+  background: transparent; color: var(--gray-500); transition: all .2s;
+}
+.filter-btn.active, .filter-btn:hover { background: var(--brand); color: #fff; }
+
+/* ─── BADGE ─── */
+.badge {
+  display: inline-flex; align-items: center;
+  font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px;
+}
+.badge.urgent  { background: var(--urgent-bg); color: var(--urgent); border: 1px solid var(--urgent-border); }
+.badge.normal  { background: var(--amber-bg); color: var(--amber); border: 1px solid #FDE68A; }
+.badge.new     { background: var(--urgent); color: #fff; }
+.badge.overdue { background: var(--urgent-bg); color: var(--urgent); }
+.badge.soon    { background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; }
+.badge.no-due  { background: var(--gray-50); color: var(--gray-400); }
+
+/* ─── EMAIL ITEM ─── */
+.email-list { display: flex; flex-direction: column; gap: 10px; }
+.email-item {
+  padding: 12px 14px; border: 1px solid var(--gray-100); border-radius: var(--radius-sm);
+  transition: all .2s; cursor: default; position: relative; overflow: hidden;
+}
+.email-item::before {
+  content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 3px;
+  background: transparent; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  transition: background .2s;
+}
+.email-item.urgent::before { background: var(--urgent); }
+.email-item.normal::before { background: var(--amber); }
+.email-item:hover { background: #FAFBFF; border-color: var(--brand-light); }
+.email-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.email-from { font-size: 13px; font-weight: 700; color: var(--gray-900); }
+.email-time { font-size: 10px; color: var(--gray-400); white-space: nowrap; }
+.email-subject { font-size: 12px; color: var(--gray-700); margin-bottom: 4px; font-weight: 500; }
+.email-snippet { font-size: 11px; color: var(--gray-500); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.email-actions { display: flex; gap: 6px; margin-top: 8px; }
+.btn-xs {
+  padding: 4px 10px; border-radius: 20px; font-family: 'Cairo',sans-serif;
+  font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid var(--gray-200);
+  background: transparent; color: var(--gray-700); transition: all .2s;
+}
+.btn-xs:hover { border-color: var(--brand); color: var(--brand); }
+.btn-xs.primary { background: var(--brand); color: #fff; border-color: var(--brand); }
+.btn-xs.primary:hover { background: var(--brand-light); border-color: var(--brand-light); }
+
+/* ─── TASK ITEM ─── */
+.task-list { display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto; }
+.task-list::-webkit-scrollbar { width: 4px; }
+.task-list::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 2px; }
+.task-item {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 10px 12px; border: 1px solid var(--gray-100); border-radius: var(--radius-sm);
+  gap: 10px; transition: background .15s;
+}
+.task-item:hover { background: var(--gray-50); }
+.task-name { font-size: 12px; font-weight: 600; color: var(--gray-900); margin-bottom: 2px; }
+.task-meta { font-size: 11px; color: var(--gray-500); }
+.task-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.task-link { font-size: 10px; color: var(--brand-light); text-decoration: none; }
+.task-link:hover { text-decoration: underline; }
+
+/* ─── DESIGNERS TABLE ─── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead tr { border-bottom: 2px solid var(--gray-100); }
+thead th {
+  text-align: center; padding: 8px 6px;
+  font-size: 11px; font-weight: 600; color: var(--gray-500);
+  white-space: nowrap;
+}
+thead th:first-child { text-align: right; }
+tbody tr {
+  border-bottom: 1px solid var(--gray-50);
+  transition: background .15s;
+}
+tbody tr:hover { background: #FAFBFF; }
+tbody tr.star { background: linear-gradient(90deg, #FEFCE8 0%, #FFFFF5 100%); }
+tbody td { padding: 11px 6px; font-size: 12px; text-align: center; }
+tbody td:first-child {
+  text-align: right; font-weight: 700; color: var(--gray-900);
+  padding-right: 4px;
+}
+.td-active   { color: var(--brand-light); font-weight: 700; }
+.td-done     { color: var(--success); font-weight: 700; }
+.td-overdue  { color: var(--urgent); font-weight: 700; }
+.td-activity { color: var(--gray-500); font-size: 11px; }
+.star-row-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: linear-gradient(135deg, #F59E0B, #EF4444);
+  color: #fff; font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 20px; margin-bottom: 8px;
+}
+
+/* ─── NOTES ─── */
+.notes-area {
+  width: 100%; border: 1px solid var(--gray-200); border-radius: var(--radius-sm);
+  padding: 10px; font-family: 'Cairo',sans-serif; font-size: 12px;
+  resize: none; background: var(--gray-50); transition: border .2s;
+  outline: none; color: var(--gray-900);
+}
+.notes-area:focus { border-color: var(--brand-light); background: #fff; }
+.btn-save {
+  width: 100%; margin-top: 8px; padding: 8px;
+  background: var(--brand); color: #fff; border: none; border-radius: var(--radius-sm);
+  font-family: 'Cairo',sans-serif; font-size: 12px; font-weight: 700; cursor: pointer;
+  transition: background .2s;
+}
+.btn-save:hover { background: var(--brand-light); }
+.note-item {
+  margin-top: 10px; padding: 10px 12px; background: var(--gray-50);
+  border-radius: var(--radius-sm); border: 1px solid var(--gray-100);
+  position: relative; transition: background .15s;
+}
+.note-item:hover { background: #FAFBFF; }
+.note-item:hover .note-del { opacity: 1; }
+.note-text { font-size: 11px; color: var(--gray-700); line-height: 1.6; }
+.note-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+.note-time { font-size: 10px; color: var(--gray-400); }
+.note-del { font-size: 10px; color: var(--gray-400); border: none; background: none; cursor: pointer; opacity: 0; transition: all .2s; font-family: 'Cairo',sans-serif; }
+.note-del:hover { color: var(--urgent); }
+
+/* ─── NEWS ─── */
+.news-scroll { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 6px; }
+.news-scroll::-webkit-scrollbar { height: 4px; }
+.news-scroll::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 2px; }
+.news-card {
+  min-width: 240px; max-width: 240px; border: 1px solid var(--gray-100);
+  border-radius: var(--radius-sm); overflow: hidden; text-decoration: none;
+  color: inherit; display: block; transition: all .22s;
+  background: var(--white);
+}
+.news-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+.news-img {
+  height: 120px; overflow: hidden; position: relative;
+  background: linear-gradient(135deg, #EEF2FF, #E0E7FF);
+  display: flex; align-items: center; justify-content: center;
+}
+.news-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+.news-card:hover .news-img img { transform: scale(1.05); }
+.news-img-placeholder { font-size: 28px; font-weight: 800; color: var(--brand); opacity: .2; }
+.news-new-badge {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--urgent); color: #fff; font-size: 9px; font-weight: 700;
+  padding: 2px 6px; border-radius: 20px;
+}
+.news-body { padding: 10px 12px; }
+.news-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.news-source { font-size: 10px; color: var(--brand-light); font-weight: 700; }
+.news-ago { font-size: 10px; color: var(--gray-400); }
+.news-title { font-size: 12px; font-weight: 600; color: var(--gray-900); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ─── MODAL ─── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(27,20,100,.45);
+  backdrop-filter: blur(4px); z-index: 200; place-items: center;
+}
+.modal-overlay.open { display: grid; animation: fadeIn .2s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  background: #fff; border-radius: 18px; box-shadow: 0 24px 60px rgba(27,20,100,.25);
+  padding: 24px; max-width: 500px; width: 95%; animation: slideUp .22s ease;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.modal-title { font-size: 15px; font-weight: 700; color: var(--brand); }
+.modal-close {
+  width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--gray-200);
+  background: none; cursor: pointer; font-size: 16px; display: grid; place-items: center;
+  color: var(--gray-500); transition: all .15s;
+}
+.modal-close:hover { background: var(--urgent-bg); color: var(--urgent); border-color: var(--urgent-border); }
+.modal-info { font-size: 11px; color: var(--gray-500); margin-bottom: 10px; padding: 8px 10px; background: var(--gray-50); border-radius: var(--radius-sm); }
+.modal-textarea {
+  width: 100%; border: 1px solid var(--gray-200); border-radius: var(--radius-sm);
+  padding: 12px; font-family: 'Cairo',sans-serif; font-size: 13px;
+  line-height: 1.7; resize: none; outline: none; color: var(--gray-900);
+  transition: border .2s;
+}
+.modal-textarea:focus { border-color: var(--brand-light); }
+.modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.btn-modal {
+  padding: 8px 18px; border-radius: 20px; font-family: 'Cairo',sans-serif;
+  font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .2s;
+}
+.btn-modal.secondary { background: var(--gray-100); color: var(--gray-700); }
+.btn-modal.secondary:hover { background: var(--gray-200); }
+.btn-modal.primary { background: var(--brand); color: #fff; }
+.btn-modal.primary:hover { background: var(--brand-light); }
+.modal-source { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: var(--brand-glow); color: var(--brand-light); font-weight: 700; }
+
+/* ─── EMPTY STATE ─── */
+.empty { text-align: center; padding: 28px 16px; color: var(--gray-400); font-size: 13px; }
+.empty-icon { font-size: 28px; margin-bottom: 8px; }
+
+/* ─── PULSE ANIMATION ─── */
+@keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.5 } }
+.pulse { animation: pulse 2s infinite; }
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<header>
+  <div class="header-inner">
+    <div class="avatar">ش</div>
+    <div>
+      <div class="header-name">شفيع الأنصاري</div>
+      <div class="header-sub">آخر تحديث: منذ دقيقتين</div>
+    </div>
+    <div class="header-counters">
+      <div class="counter">
+        <span class="counter-dot red pulse"></span>
+        <span class="counter-label">إيميلات تحتاج رد</span>
+        <span class="counter-value">4</span>
+      </div>
+      <div class="counter">
+        <span class="counter-dot yellow"></span>
+        <span class="counter-label">طلبات Traffic</span>
+        <span class="counter-value">6</span>
+      </div>
+    </div>
+    <button class="btn-refresh" onclick="alert('تحديث كل البيانات...')">تحديث الكل</button>
+    <button class="btn-gmail">✓ Gmail مرتبط</button>
+  </div>
+</header>
+
+<!-- ─── MAIN ─── -->
+<main>
+  <div class="grid-main">
+
+    <!-- ─── COL LEFT ─── -->
+    <div class="col-left">
+
+      <!-- EMAILS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">إيميلات تحتاج رداً <span>Gmail</span></div>
+        </div>
+        <div class="email-list" id="emailList"></div>
+      </div>
+
+      <!-- TASKS / TRAFFIC -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">طلبات جديدة في Traffic <span>تحتاج توزيع</span></div>
+          <div class="filter-tabs">
+            <button class="filter-btn active" onclick="filterTasks('all',this)">الكل</button>
+            <button class="filter-btn" onclick="filterTasks('overdue',this)">متأخرة</button>
+            <button class="filter-btn" onclick="filterTasks('this_week',this)">هذا الأسبوع</button>
+            <button class="filter-btn" onclick="filterTasks('no_due',this)">بدون موعد</button>
+          </div>
+        </div>
+        <div class="task-list" id="taskList"></div>
+      </div>
+    </div>
+
+    <!-- ─── COL MIDDLE: DESIGNERS ─── -->
+    <div class="card" style="align-self:start;">
+      <div class="card-header">
+        <div class="card-title">تقرير المصممين <span>القسم الفني</span></div>
+      </div>
+      <div id="designersStar"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>المصمم</th>
+              <th>نشطة</th>
+              <th>مكتملة</th>
+              <th>متأخرة</th>
+              <th>آخر نشاط</th>
+            </tr>
+          </thead>
+          <tbody id="designersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─── COL NOTES ─── -->
+    <div class="card col-notes" style="align-self:start;">
+      <div class="card-header">
+        <div class="card-title">ملاحظات سريعة</div>
+      </div>
+      <textarea class="notes-area" id="noteDraft" rows="3" placeholder="اكتب ملاحظة سريعة..."></textarea>
+      <button class="btn-save" onclick="addNote()">حفظ</button>
+      <div id="notesList"></div>
+    </div>
+
+  </div>
+
+  <!-- ─── NEWS ─── -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">أخبار التصميم والذكاء الاصطناعي</div>
+      <div class="filter-tabs">
+        <button class="filter-btn active" onclick="filterNews('all',this)">الكل</button>
+        <button class="filter-btn" onclick="filterNews('ai',this)">ذكاء اصطناعي</button>
+        <button class="filter-btn" onclick="filterNews('design',this)">تصميم</button>
+      </div>
+    </div>
+    <div class="news-scroll" id="newsList"></div>
+  </div>
+</main>
+
+<!-- ─── REPLY MODAL ─── -->
+<div class="modal-overlay" id="replyModal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">رد مقترح</span>
+      <span class="modal-source" id="modalSource">قالب جاهز</span>
+      <button class="modal-close" onclick="document.getElementById('replyModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-info" id="modalInfo"></div>
+    <textarea class="modal-textarea" id="modalText" rows="9" dir="rtl"></textarea>
+    <div class="modal-footer">
+      <button class="btn-modal secondary" onclick="document.getElementById('replyModal').classList.remove('open')">إغلاق</button>
+      <button class="btn-modal secondary" onclick="copyReply()">نسخ</button>
+      <button class="btn-modal primary" id="modalGmailBtn">افتح في Gmail ↗</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────
+const emails = [
+  { id:1, from:'عبدالجليل الحازمي', subject:'طلب تصميم عرض المشروع الاستراتيجي للمحافظ', snippet:'يرجى التفضل بإعداد العرض المرفق حسب الهوية البصرية المعتمدة وتسليمه قبل نهاية الأسبوع.', time:'منذ 26 ساعة', priority:'urgent', link:'#' },
+  { id:2, from:'إبراهيم الدسيماني', subject:'استفسار عن إنجاز تصميم هوية وحدة الإسناد', snippet:'نأمل التكرم بتزويدنا بآخر مستجدات تصميم الهوية البصرية الخاصة بالوحدة وموعد التسليم.', time:'منذ 31 ساعة', priority:'urgent', link:'#' },
+  { id:3, from:'فدوه بن جديد', subject:'دعوة فعالية يوم الموارد البشرية الوطني', snippet:'مرفق محتوى الدعوة والشعار، نحتاج التصميم النهائي بحلول الساعة الثالثة عصر اليوم.', time:'منذ ساعتين', priority:'normal', link:'#' },
+  { id:4, from:'ريم الأحمدي', subject:'ملاحظات على العرض الفني للتميز التشغيلي', snippet:'بعد مراجعة العرض المرسل، لدينا بعض التعديلات المطلوبة على الشرائح 14-18 فيما يخص الألوان.', time:'منذ 5 ساعات', priority:'normal', link:'#' },
+];
+
+const tasks = [
+  { id:1, name:'نظام الاقتراحات ربع السنوي', meta:'طلب من فدوه بن جديد', due:null, tag:'no_due' },
+  { id:2, name:'عرض فني لعميل المياه - هيئة المياه السعودية', meta:'إدارة المحافظ', due:'2026-05-24', tag:'overdue' },
+  { id:3, name:'إنفوجرافيك التقرير الربعي الأول 2026', meta:'إدارة التميز التشغيلي', due:'2026-06-04', tag:'this_week' },
+  { id:4, name:'تصاميم شاشات داخلية — اليوم الوطني', meta:'رأس المال البشري', due:null, tag:'no_due' },
+  { id:5, name:'عرض تدريبي — أكاديمية ون', meta:'وحدة الإسناد الإبداعي', due:'2026-06-03', tag:'this_week' },
+  { id:6, name:'هوية بصرية مشروع شراكة الأكاديمية', meta:'إبراهيم الدسيماني', due:'2026-05-22', tag:'overdue' },
+];
+
+const designers = [
+  { name:'Mohamed Makald',   active:1, done:9, overdue:0, last:'اليوم' },
+  { name:'Ashraf Rahmouny',  active:3, done:8, overdue:0, last:'اليوم' },
+  { name:'Asim Alghareeb',   active:4, done:7, overdue:1, last:'اليوم' },
+  { name:'khlood Bawadood',  active:2, done:5, overdue:0, last:'أمس' },
+  { name:'Asma Babadur',     active:2, done:3, overdue:0, last:'أمس' },
+  { name:'Mohamed Mostafa',  active:1, done:1, overdue:0, last:'منذ يومين' },
+];
+
+const newsItems = [
+  { title:'Epic\'s Unreal Engine 6 reveal got a standing ovation', source:'Creative Bloq', cat:'design', ago:'منذ 3 ساعات', isNew:true },
+  { title:'OpenAI GPT-5 Brings Native Image Generation to ChatGPT', source:'TechCrunch AI', cat:'ai', ago:'منذ ساعة', isNew:true },
+  { title:'The Ultimate Guide to Design Systems in 2025', source:'Smashing Magazine', cat:'design', ago:'منذ 5 ساعات', isNew:false },
+  { title:'Google DeepMind\'s Gemini 2.0 now open to all developers', source:'TechCrunch AI', cat:'ai', ago:'منذ 8 ساعات', isNew:false },
+  { title:'Apple\'s redesigned App Store shows a new visual direction', source:'The Verge Design', cat:'design', ago:'منذ 12 ساعة', isNew:false },
+  { title:'Claude 4 Opus: Anthropic\'s most capable model yet', source:'TechCrunch AI', cat:'ai', ago:'منذ يوم', isNew:false },
+  { title:'Typography trends that will define 2025 graphic design', source:'Creative Bloq', cat:'design', ago:'منذ يوم', isNew:false },
+  { title:'Figma AI now can generate complete UI screens from prompts', source:'Designer News', cat:'design', ago:'منذ يومين', isNew:false },
+];
+
+const notesData = [
+  { id:1, text:'مراجعة عروض فريق التصميم قبل الجمعة وإرسال الملاحظات الفنية', time:'منذ ساعة' },
+  { id:2, text:'التنسيق مع عبدالله العزاز بخصوص محتوى التقرير الربعي', time:'منذ 3 ساعات' },
+];
+let noteIdCounter = 3;
+
+// ─── RENDER FUNCTIONS ────────────────────────────────────
+
+function renderEmails() {
+  const el = document.getElementById('emailList');
+  el.innerHTML = emails.map(e => `
+    <div class="email-item ${e.priority}">
+      <div class="email-top">
+        <div>
+          <span class="email-from">${e.from}</span>
+          &nbsp;<span class="badge ${e.priority === 'urgent' ? 'urgent' : 'normal'}">${e.priority === 'urgent' ? 'عاجل +24h' : 'عادي'}</span>
+        </div>
+        <span class="email-time">${e.time}</span>
+      </div>
+      <div class="email-subject">${e.subject}</div>
+      <div class="email-snippet">${e.snippet}</div>
+      <div class="email-actions">
+        <a href="${e.link}" class="btn-xs">افتح في Gmail</a>
+        <button class="btn-xs primary" onclick="openReply(${e.id})">اقتراح رد</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+let currentTaskFilter = 'all';
+function filterTasks(f, btn) {
+  currentTaskFilter = f;
+  document.querySelectorAll('.filter-tabs .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTasks();
+}
+
+function getTaskBadge(t) {
+  if (t.tag === 'overdue') return `<span class="badge overdue">متأخرة</span>`;
+  if (t.tag === 'this_week') return `<span class="badge soon">هذا الأسبوع</span>`;
+  return `<span class="badge no-due">بدون موعد</span>`;
+}
+
+function renderTasks() {
+  const el = document.getElementById('taskList');
+  const filtered = tasks.filter(t => currentTaskFilter === 'all' || t.tag === currentTaskFilter);
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">✓</div>لا توجد مهام في هذا الفلتر</div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(t => `
+    <div class="task-item">
+      <div>
+        <div class="task-name">${t.name}</div>
+        <div class="task-meta">${t.meta}</div>
+      </div>
+      <div class="task-right">
+        ${getTaskBadge(t)}
+        <a href="#" class="task-link">افتح ↗</a>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderDesigners() {
+  const star = designers.reduce((a,b) => (b.done + b.active) > (a.done + a.active) ? b : a);
+  document.getElementById('designersStar').innerHTML = `
+    <div class="star-row-badge">⭐ الأكثر نشاطاً هذا الأسبوع: ${star.name}</div>
+  `;
+  document.getElementById('designersBody').innerHTML = designers.map(d => `
+    <tr class="${d.name === star.name ? 'star' : ''}">
+      <td>${d.name}${d.name === star.name ? ' ⭐' : ''}</td>
+      <td class="td-active">${d.active}</td>
+      <td class="td-done">${d.done}</td>
+      <td class="${d.overdue > 0 ? 'td-overdue' : 'td-activity'}">${d.overdue}</td>
+      <td class="td-activity">${d.last}</td>
+    </tr>
+  `).join('');
+}
+
+let newsFilter = 'all';
+function filterNews(f, btn) {
+  newsFilter = f;
+  document.querySelectorAll('#newsList').forEach(()=>{});
+  const btns = btn.closest('.filter-tabs').querySelectorAll('.filter-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderNews();
+}
+
+function renderNews() {
+  const el = document.getElementById('newsList');
+  const filtered = newsItems.filter(n => newsFilter === 'all' || n.cat === newsFilter);
+  const colors = ['#EEF2FF','#FDF4FF','#F0FDF4','#FFFBEB','#F0F9FF','#FFF1F2'];
+  el.innerHTML = filtered.map((n, i) => `
+    <a href="#" class="news-card" onclick="return false">
+      <div class="news-img" style="background: ${colors[i % colors.length]}">
+        <div class="news-img-placeholder">${n.source.charAt(0)}</div>
+        ${n.isNew ? `<span class="news-new-badge">جديد</span>` : ''}
+      </div>
+      <div class="news-body">
+        <div class="news-meta">
+          <span class="news-source">${n.source}</span>
+          <span class="news-ago">${n.ago}</span>
+        </div>
+        <div class="news-title">${n.title}</div>
+      </div>
+    </a>
+  `).join('');
+}
+
+function renderNotes() {
+  document.getElementById('notesList').innerHTML = notesData.map(n => `
+    <div class="note-item" id="note-${n.id}">
+      <div class="note-text">${n.text}</div>
+      <div class="note-footer">
+        <span class="note-time">${n.time}</span>
+        <button class="note-del" onclick="deleteNote(${n.id})">حذف</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addNote() {
+  const draft = document.getElementById('noteDraft');
+  const text = draft.value.trim();
+  if (!text) return;
+  notesData.unshift({ id: noteIdCounter++, text, time: 'الآن' });
+  if (notesData.length > 5) notesData.pop();
+  draft.value = '';
+  renderNotes();
+}
+
+function deleteNote(id) {
+  const idx = notesData.findIndex(n => n.id === id);
+  if (idx > -1) { notesData.splice(idx, 1); renderNotes(); }
+}
+
+// ─── REPLY MODAL ─────────────────────────────────────────
+function openReply(emailId) {
+  const e = emails.find(x => x.id === emailId);
+  if (!e) return;
+  const first = e.from.split(' ')[0];
+  document.getElementById('modalInfo').innerHTML = `<b>إلى:</b> ${e.from} &nbsp;|&nbsp; <b>الموضوع:</b> ${e.subject}`;
+  document.getElementById('modalText').value = `الزميل/الزميلة ${first}، تحية طيبة،\n\nبخصوص "${e.subject}" — تم الاطلاع على طلبكم، وسيتم الرجوع لكم بالرد النهائي قبل نهاية اليوم.\n\nمع أطيب التحيات،`;
+  document.getElementById('modalGmailBtn').onclick = () => { window.open(e.link, '_blank'); };
+  document.getElementById('replyModal').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('replyModal')) {
+    document.getElementById('replyModal').classList.remove('open');
+  }
+}
+
+function copyReply() {
+  const text = document.getElementById('modalText').value;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target; btn.textContent = 'تم النسخ ✓';
+    setTimeout(() => { btn.textContent = 'نسخ'; }, 2000);
+  });
+}
+
+document.getElementById('noteDraft').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) addNote();
+});
+
+// ─── INIT ────────────────────────────────────────────────
+renderEmails();
+renderTasks();
+renderDesigners();
+renderNews();
+renderNotes();
+</script>
+</body>
+</html>

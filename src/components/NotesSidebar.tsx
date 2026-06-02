@@ -1,53 +1,50 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SectionCard } from "./Skeleton";
 import { timeAgoAr } from "@/lib/team";
 
-type Note = { id: string; content: string; createdAt: string };
+type Note = { id: string; content: string; createdAt: number };
+
+const STORAGE_KEY = "dm_notes";
+
+function loadNotes(): Note[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveNotes(notes: Note[]) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(notes.slice(0, 5)));
+}
 
 export function NotesSidebar() {
-  const qc = useQueryClient();
+  const [notes, setNotes] = useState<Note[]>([]);
   const [draft, setDraft] = useState("");
 
-  const q = useQuery({
-    queryKey: ["notes"],
-    queryFn: async () => {
-      const r = await fetch("/api/notes");
-      return (await r.json()) as { notes: Note[] };
-    },
-  });
+  useEffect(() => {
+    setNotes(loadNotes());
+  }, []);
 
-  const addMutation = useMutation({
-    mutationFn: async (content: string) => {
-      const r = await fetch("/api/notes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
-      });
-      if (!r.ok) throw new Error("فشل الحفظ");
-      return r.json();
-    },
-    onSuccess: () => {
-      setDraft("");
-      qc.invalidateQueries({ queryKey: ["notes"] });
-    },
-  });
+  const add = () => {
+    const text = draft.trim();
+    if (!text) return;
+    const updated = [
+      { id: Date.now().toString(), content: text, createdAt: Date.now() },
+      ...notes,
+    ].slice(0, 5);
+    setNotes(updated);
+    saveNotes(updated);
+    setDraft("");
+  };
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      await fetch("/api/notes", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["notes"] }),
-  });
-
-  const submit = () => {
-    if (draft.trim()) addMutation.mutate(draft.trim());
+  const remove = (id: string) => {
+    const updated = notes.filter((n) => n.id !== id);
+    setNotes(updated);
+    saveNotes(updated);
   };
 
   return (
@@ -56,7 +53,7 @@ export function NotesSidebar() {
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit();
+          if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) add();
         }}
         rows={3}
         placeholder="اكتب ملاحظة سريعة..."
@@ -64,26 +61,21 @@ export function NotesSidebar() {
         dir="rtl"
       />
       <button
-        onClick={submit}
-        disabled={!draft.trim() || addMutation.isPending}
+        onClick={add}
+        disabled={!draft.trim()}
         className="w-full mt-2 px-3 py-1.5 text-sm rounded-lg bg-brand text-white hover:bg-brand-light disabled:opacity-50"
       >
-        {addMutation.isPending ? "جاري الحفظ..." : "حفظ"}
+        حفظ
       </button>
 
       <div className="mt-4 space-y-2">
-        {q.data?.notes?.map((n) => (
-          <div
-            key={n.id}
-            className="p-2 border border-gray-100 rounded-lg group hover:bg-brand-bg"
-          >
+        {notes.map((n) => (
+          <div key={n.id} className="p-2 border border-gray-100 rounded-lg group hover:bg-brand-bg">
             <p className="text-xs text-gray-700 whitespace-pre-wrap break-words">{n.content}</p>
             <div className="flex items-center justify-between mt-1">
-              <span className="text-[10px] text-gray-400">
-                {timeAgoAr(new Date(n.createdAt).getTime())}
-              </span>
+              <span className="text-[10px] text-gray-400">{timeAgoAr(n.createdAt)}</span>
               <button
-                onClick={() => deleteMutation.mutate(n.id)}
+                onClick={() => remove(n.id)}
                 className="text-[10px] text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition"
               >
                 حذف
@@ -91,7 +83,7 @@ export function NotesSidebar() {
             </div>
           </div>
         ))}
-        {!q.data?.notes?.length && (
+        {!notes.length && (
           <div className="text-xs text-gray-400 text-center py-3">لا توجد ملاحظات بعد</div>
         )}
       </div>

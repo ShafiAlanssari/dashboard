@@ -1,12 +1,3 @@
-export const DESIGNERS = [
-  "محمد الطنوبي",
-  "أسماء بابدر",
-  "عاصم الغريب",
-  "أشرف الرحموني",
-  "خلود باودود",
-  "محمد مصطفى",
-];
-
 export function timeAgoAr(ts: number): string {
   const diffMs = Date.now() - ts;
   const minutes = Math.floor(diffMs / (1000 * 60));

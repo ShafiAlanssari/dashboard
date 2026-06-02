@@ -62,7 +62,7 @@ export function Header({ onRefresh }: { onRefresh: () => void }) {
           />
           <Counter
             color="yellow"
-            label="مهام معلقة"
+            label="طلبات Traffic"
             value={pendingTasks}
             loading={tasksQ.isLoading}
           />
